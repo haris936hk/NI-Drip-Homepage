@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NI DRIP CENTRAL — The Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050505;--s:#0A0A0A;--card:#101010;
+  --blue:#0091FF;--blue2:#0070CC;--bglow:rgba(0,145,255,.11);
+  --amber:#E8940A;--t:#F0EDE6;--m:#2E2E2E;--ml:#666;
+  --b:rgba(255,255,255,.06);--bs:rgba(255,255,255,.1);
+}
+html{scroll-behavior:auto}
+body{background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;font-weight:300;overflow-x:hidden;cursor:none}
+
+/* ── CURSOR ── */
+#cd,#cr{position:fixed;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+#cd{width:6px;height:6px;background:var(--blue);transition:opacity .15s,width .2s,height .2s}
+#cr{width:34px;height:34px;border:1px solid rgba(0,145,255,.4);transition:width .3s,height .3s,border-color .3s,background .3s}
+body.ch #cd{opacity:0}
+body.ch #cr{width:58px;height:58px;background:rgba(0,145,255,.06);border-color:var(--blue)}
+
+/* ── PROGRESS ── */
+#pb{position:fixed;top:0;left:0;height:2px;background:var(--blue);z-index:800;width:0;will-change:width}
+
+/* ── NAV ── */
+#nav{position:fixed;top:0;left:0;right:0;z-index:300;padding:1.4rem 6vw;display:flex;justify-content:space-between;align-items:center;transition:background .4s,border-color .4s;border-bottom:1px solid transparent}
+#nav.s{background:rgba(5,5,5,.93);border-bottom-color:var(--b);backdrop-filter:blur(18px)}
+.nL{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.1em;color:var(--t);text-decoration:none;opacity:0}
+.nL em{font-style:normal;color:var(--blue)}
+.nR{display:flex;align-items:center;gap:2.5rem;opacity:0}
+.nLk{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--ml);text-decoration:none;transition:color .2s}
+.nLk:hover{color:var(--t)}
+.nCta{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--t);text-decoration:none;border:1px solid rgba(255,255,255,.12);padding:7px 18px;border-radius:2px;transition:border-color .3s,background .3s}
+.nCta:hover{border-color:var(--blue);background:var(--bglow)}
+
+/* ── HERO ── */
+.hero{height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 6vw 8vh;position:relative;overflow:hidden}
+.hgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,145,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(0,145,255,.028) 1px,transparent 1px);background-size:64px 64px;pointer-events:none}
+.hvig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,transparent 20%,rgba(5,5,5,.88) 100%);pointer-events:none}
+.h眉{display:flex;align-items:center;gap:1.2rem;margin-bottom:2rem;opacity:0;transform:translateY(12px);position:relative;z-index:1}
+.hbadge{display:inline-flex;align-items:center;gap:7px;font-size:8.5px;letter-spacing:.42em;text-transform:uppercase;color:var(--blue);border:1px solid rgba(0,145,255,.25);padding:5px 12px;border-radius:2px}
+.hbdot{width:5px;height:5px;border-radius:50%;background:var(--blue);animation:blink 2.2s infinite}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.15;transform:scale(.5)}}
+.hdiv{width:1px;height:14px;background:var(--b)}
+.hest{font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--ml)}
+.htitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(80px,14.5vw,212px);line-height:.87;letter-spacing:.01em;position:relative;z-index:1;margin-bottom:2.8rem}
+.hln{overflow:hidden;display:block}
+.hli{display:block;transform:translateY(110%)}
+.hli.bl{color:var(--blue)}
+.hli.gx{color:transparent;-webkit-text-stroke:1px rgba(240,237,230,.13)}
+.hfoot{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-end}
+.hdesc{font-size:clamp(12px,1.1vw,14.5px);line-height:1.9;color:rgba(240,237,230,.3);max-width:380px;opacity:0;transform:translateY(14px)}
+.hscr{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0}
+.hscrL{font-size:7.5px;letter-spacing:.4em;text-transform:uppercase;color:var(--ml);writing-mode:vertical-rl}
+.hscrLn{width:1px;height:56px;background:linear-gradient(to bottom,var(--blue),transparent);animation:sLine 2.4s ease-in-out infinite}
+@keyframes sLine{0%{transform:scaleY(0);transform-origin:top;opacity:1}50%{transform:scaleY(1);transform-origin:top;opacity:1}100%{transform:scaleY(1);transform-origin:bottom;opacity:0}}
+
+/* ── TICKER ── */
+.tkr{border-top:1px solid var(--b);border-bottom:1px solid var(--b);overflow:hidden;background:var(--bg)}
+.trow{display:flex;overflow:hidden;border-bottom:1px solid var(--b)}
+.trow:last-child{border-bottom:none}
+.ttrk{display:flex;white-space:nowrap;animation:tick 28s linear infinite}
+.ttrk.rev{animation-direction:reverse;animation-duration:22s}
+.titem{display:inline-flex;align-items:center;gap:.9rem;padding:.82rem 2rem;font-size:9.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--ml)}
+.tdot{color:var(--blue);font-size:7px}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── WORD SCRUB ── */
+.ws{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0 9vw;position:relative;background:var(--bg)}
+.wslbl{position:absolute;top:6vh;left:6vw;font-size:9px;letter-spacing:.44em;text-transform:uppercase;color:var(--blue)}
+.wsnm{position:absolute;top:6vh;right:6vw;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--m)}
+.wstext{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5.2vw,78px);line-height:1.16;text-align:center;max-width:1100px}
+.sw{display:inline-block;color:var(--m);margin-right:.22em}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--b);border-bottom:1px solid var(--b)}
+.sst{padding:3.5rem 3.5vw;border-right:1px solid var(--b);text-align:center;position:relative;overflow:hidden}
+.sst:last-child{border-right:none}
+.sstbar{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--blue);transform:scaleX(0);transform-origin:left;transition:transform .75s ease}
+.sst.in .sstbar{transform:scaleX(1)}
+.snum{font-family:'Bebas Neue',sans-serif;font-size:clamp(50px,6vw,90px);color:var(--blue);line-height:1;display:block}
+.slbl{font-size:8.5px;letter-spacing:.36em;text-transform:uppercase;color:var(--ml);display:block;margin-top:.3rem}
+.ssub{font-size:11px;color:rgba(240,237,230,.16);display:block;margin-top:.25rem}
+
+/* ── STORY ── */
+.story{min-height:100vh;display:flex;align-items:center;padding:12vh 6vw;border-bottom:1px solid var(--b);overflow:hidden}
+.stIn{display:grid;grid-template-columns:1.15fr 1fr;gap:5vw;align-items:center;width:100%}
+.stGhost{font-family:'Bebas Neue',sans-serif;font-size:clamp(140px,23vw,340px);color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.033);line-height:.85;user-select:none}
+.stTag{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,54px);color:var(--t);margin-top:-.7rem;position:relative}
+.slabel{font-size:9px;letter-spacing:.44em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:1.4rem}
+.stR h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(34px,4.5vw,60px);line-height:1.05;margin-bottom:2rem}
+.stR h2 em{font-style:normal;color:var(--blue)}
+.stbody{font-size:14px;line-height:1.92;color:rgba(240,237,230,.38);margin-bottom:1.5rem}
+.fc{display:flex;align-items:center;gap:1rem;padding:1.4rem 1.6rem;background:var(--s);border:1px solid var(--b);margin-top:2.5rem;position:relative}
+.fc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--blue)}
+.fav{width:44px;height:44px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#fff;flex-shrink:0}
+.fname{font-size:14px;font-weight:500;display:block}
+.frole{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(240,237,230,.28);display:block;margin-bottom:2px}
+
+/* ── WHY CHOOSE ── */
+#why{height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 6vw;border-bottom:1px solid var(--b)}
+.why-hd{margin-bottom:3rem}
+.why-t{font-family:'Bebas Neue',sans-serif;font-size:clamp(42px,7.5vw,102px);line-height:1}
+.why-t em{font-style:normal;color:var(--blue)}
+.wgrid{display:grid;grid-template-columns:repeat(4,1fr);background:var(--b);gap:1px;border:1px solid var(--b)}
+.wcard{background:var(--card);padding:2rem 1.5rem;position:relative;overflow:hidden;opacity:0;transform:translateY(28px)}
+.wbar{position:absolute;top:0;left:0;right:0;height:2px;background:var(--blue);transform:scaleX(0);transform-origin:left;transition:transform .5s ease}
+.wcard.lit .wbar{transform:scaleX(1)}
+.wnum{font-family:'Bebas Neue',sans-serif;font-size:58px;line-height:1;color:rgba(255,255,255,.025);margin-bottom:.8rem}
+.wico{font-size:20px;display:block;margin-bottom:.7rem}
+.wcard h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.02em;margin-bottom:.6rem}
+.wcard p{font-size:12px;line-height:1.72;color:rgba(240,237,230,.3)}
+
+/* ── HORIZONTAL SCROLL ── */
+#hs{height:100vh;overflow:hidden;position:relative;border-bottom:1px solid var(--b)}
+#hshead{position:absolute;top:8vh;left:6vw;z-index:10}
+#hshead h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6.5vw,88px);line-height:1}
+#hshead h2 em{font-style:normal;color:var(--blue)}
+#hstrk{display:flex;height:100vh;width:max-content;will-change:transform}
+.hpc{width:52vw;height:100%;flex-shrink:0;padding:20vh 5vw 10vh;border-right:1px solid var(--b);display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;transition:background .4s}
+.hpc:hover{background:var(--s)}
+.hpnum{position:absolute;top:8vh;right:3vw;font-family:'Bebas Neue',sans-serif;font-size:140px;color:rgba(255,255,255,.017);line-height:1;user-select:none;pointer-events:none}
+.hpemj{font-size:62px;display:block;margin-bottom:2rem;filter:grayscale(1) brightness(.32);transition:filter .5s}
+.hpc:hover .hpemj{filter:grayscale(0) brightness(1)}
+.hbg{display:inline-block;font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;padding:4px 10px;border-radius:2px;margin-bottom:.9rem}
+.bn{border:1px solid var(--blue);color:var(--blue)}
+.br{border:1px solid var(--amber);color:var(--amber)}
+.bb{border:1px solid rgba(255,255,255,.13);color:rgba(255,255,255,.3)}
+.hpc h3{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,4vw,54px);line-height:1;margin-bottom:.6rem}
+.hpc p{font-size:12.5px;line-height:1.72;color:rgba(240,237,230,.3);max-width:300px}
+.hpline{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--blue);transform:scaleX(0);transform-origin:left;transition:transform .4s}
+.hpc:hover .hpline{transform:scaleX(1)}
+#hdots{position:absolute;bottom:5vh;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10}
+.hdot{width:22px;height:2px;border-radius:2px;background:var(--m);transition:background .3s,width .3s}
+.hdot.a{background:var(--blue);width:36px}
+
+/* ── REFURB ── */
+.refurb{padding:14vh 6vw;border-bottom:1px solid var(--b);background:var(--s)}
+.rfhd{display:grid;grid-template-columns:1fr 1fr;gap:4vw;align-items:end;margin-bottom:6rem}
+.rftitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,86px);line-height:1}
+.rftitle em{font-style:normal;color:var(--blue)}
+.rfdesc{font-size:13.5px;line-height:1.88;color:rgba(240,237,230,.37)}
+.rfbadge{display:inline-flex;align-items:center;gap:8px;margin-top:1.5rem;padding:9px 16px;border:1px solid rgba(0,145,255,.28);color:var(--blue);font-size:9px;letter-spacing:.26em;text-transform:uppercase;border-radius:2px}
+.proc{position:relative;padding-top:0}
+.pline{position:absolute;top:27px;left:calc(10% + 14px);width:calc(80% - 28px);height:2px;background:rgba(255,255,255,.04);overflow:hidden}
+.pfill{width:100%;height:100%;background:var(--blue);transform:scaleX(0);transform-origin:left;will-change:transform}
+.psteps{display:grid;grid-template-columns:repeat(5,1fr);position:relative;z-index:1}
+.pstep{display:flex;flex-direction:column;align-items:center;gap:1.4rem;opacity:0;transform:translateY(18px)}
+.pdot{width:54px;height:54px;border-radius:50%;border:2px solid var(--b);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px;transition:border-color .5s,background .5s}
+.pstep.lit .pdot{border-color:var(--blue);background:rgba(0,145,255,.09)}
+.plbl{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.05em;text-align:center;color:rgba(240,237,230,.28);transition:color .5s}
+.pstep.lit .plbl{color:var(--t)}
+.psub{font-size:10.5px;text-align:center;color:var(--ml);line-height:1.55;max-width:110px}
+
+/* ── DELIVERY ── */
+.del{padding:14vh 6vw;border-bottom:1px solid var(--b)}
+.delhd{margin-bottom:5rem}
+.deltitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,86px);line-height:1;margin-bottom:.4rem}
+.deltitle em{font-style:normal;color:var(--blue)}
+.delsub{font-size:13px;color:rgba(240,237,230,.3);line-height:1.75}
+.delgrid{display:grid;grid-template-columns:1.2fr 1fr;gap:5vw;align-items:start}
+.delzones{display:flex;flex-direction:column;gap:1px;background:var(--b);border:1px solid var(--b)}
+.delz{background:var(--card);padding:1.8rem 2rem;display:flex;justify-content:space-between;align-items:center;position:relative;overflow:hidden;opacity:0;transform:translateX(-22px)}
+.dbar{position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--blue);transform:scaleY(0);transform-origin:top;transition:transform .5s ease}
+.delz.in .dbar{transform:scaleY(1)}
+.dzname{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.02em}
+.dztime strong{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--blue);display:block;line-height:1}
+.dztime span{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ml);text-align:right;display:block}
+.delxtras{display:flex;flex-direction:column;gap:1rem}
+.delx{padding:1.6rem;background:var(--s);border:1px solid var(--b);opacity:0;transform:translateX(22px)}
+.dxlbl{font-size:8.5px;letter-spacing:.42em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:.5rem}
+.dxtitle{font-family:'Bebas Neue',sans-serif;font-size:20px;margin-bottom:.4rem}
+.delx p{font-size:11.5px;line-height:1.65;color:rgba(240,237,230,.28)}
+
+/* ── RETURNS / WARRANTY ── */
+.rw{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--b);border-bottom:1px solid var(--b)}
+.rwc{padding:5rem 6vw;border-right:1px solid var(--b);position:relative;overflow:hidden;opacity:0;transform:translateY(24px)}
+.rwc:last-child{border-right:none}
+.rwbar{position:absolute;top:0;left:0;right:0;height:2px;background:var(--blue);transform:scaleX(0);transform-origin:left;transition:transform .75s ease}
+.rwc.in .rwbar{transform:scaleX(1)}
+.rwbig{font-family:'Bebas Neue',sans-serif;font-size:clamp(80px,11vw,150px);color:var(--blue);line-height:1;display:block}
+.rwlbl{font-size:8.5px;letter-spacing:.4em;text-transform:uppercase;color:var(--ml);display:block;margin-bottom:.8rem}
+.rwdesc{font-size:13px;line-height:1.78;color:rgba(240,237,230,.3)}
+
+/* ── PAYMENT & SUPPORT ── */
+.pay{padding:14vh 6vw;border-bottom:1px solid var(--b)}
+.payIn{display:grid;grid-template-columns:1fr 1fr;gap:6vw}
+.paytit{font-family:'Bebas Neue',sans-serif;font-size:clamp(34px,5vw,66px);line-height:1;margin-bottom:2.5rem}
+.paytit em{font-style:normal;color:var(--blue)}
+.pmethods{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b);border:1px solid var(--b);margin-bottom:1rem}
+.pm{background:var(--card);padding:1.4rem;opacity:0;transform:translateY(14px)}
+.pmico{font-size:18px;display:block;margin-bottom:.5rem}
+.pmname{font-size:13px;font-weight:500;display:block;margin-bottom:.2rem}
+.pmdesc{font-size:11px;color:var(--ml);line-height:1.55}
+.pfin{display:flex;align-items:center;gap:1rem;padding:1.3rem 1.4rem;border:1px solid rgba(0,145,255,.2);background:var(--bglow);opacity:0;transform:translateY(12px)}
+.pfin p{font-size:12px;line-height:1.6;color:rgba(240,237,230,.4)}
+.pfin strong{color:var(--blue);font-weight:500}
+.supch{display:flex;flex-direction:column;gap:1px;background:var(--b);border:1px solid var(--b)}
+.sc{background:var(--card);padding:1.3rem 1.6rem;display:flex;align-items:center;gap:1rem;opacity:0;transform:translateX(18px)}
+.scdot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0}
+.scname{font-size:13px;font-weight:500;flex:1}
+.scdet{font-size:10.5px;color:var(--ml)}
+
+/* ── CTA ── */
+.cta{padding:20vh 6vw;text-align:center;position:relative;overflow:hidden;border-top:1px solid var(--b)}
+.ctaghost{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:26vw;color:rgba(255,255,255,.011);pointer-events:none;white-space:nowrap;user-select:none;letter-spacing:-.02em}
+.ctatag{font-size:8.5px;letter-spacing:.5em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:2.5rem;opacity:0;transform:translateY(10px)}
+.ctatit{font-family:'Bebas Neue',sans-serif;font-size:clamp(58px,11.5vw,160px);line-height:.88;margin-bottom:4rem;position:relative;z-index:1;opacity:0;transform:translateY(40px)}
+.ctatit em{font-style:normal;color:var(--blue)}
+.magbtn{display:inline-flex;align-items:center;gap:12px;background:var(--blue);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.14em;padding:1.1rem 3.5rem;text-decoration:none;border-radius:2px;position:relative;overflow:hidden;cursor:none;opacity:0;transform:scale(.88)}
+.magbtn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.09);transform:translateX(-101%);transition:transform .4s}
+.magbtn:hover::after{transform:translateX(0)}
+.ctaloc{display:block;margin-top:2.5rem;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--ml);opacity:0}
+
+/* ── FOOTER ── */
+.footer{border-top:1px solid var(--b);padding:2rem 6vw;display:flex;justify-content:space-between;align-items:center}
+.flogo{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.08em}
+.flogo em{font-style:normal;color:var(--blue)}
+.flinks{display:flex;gap:2rem}
+.flnk{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--ml);text-decoration:none;transition:color .2s}
+.flnk:hover{color:var(--t)}
+.fcopy{font-size:9px;color:var(--ml);letter-spacing:.08em}
+</style>
+</head>
+<body>
+
+<!-- ── CURSOR ── -->
+<div id="cd"></div>
+<div id="cr"></div>
+
+<!-- ── PROGRESS BAR ── -->
+<div id="pb"></div>
+
+<!-- ── NAV ── -->
+<nav id="nav">
+  <a href="#" class="nL">NI DRIP <em>CENTRAL</em></a>
+  <div class="nR">
+    <a href="#" class="nLk">Our Story</a>
+    <a href="#" class="nLk">Products</a>
+    <a href="#" class="nLk">Refurbished</a>
+    <a href="#" class="nCta">Shop Now</a>
+  </div>
+</nav>
+
+<!-- ────────────────────────────────────
+     01 · HERO
+─────────────────────────────────────── -->
+<section class="hero">
+  <div class="hgrid"></div>
+  <div class="hvig"></div>
+  <div class="h眉">
+    <span class="hbadge"><span class="hbdot"></span> Belfast · Est. 2025</span>
+    <span class="hdiv"></span>
+    <span class="hest">Electronics &amp; Appliances</span>
+  </div>
+  <h1 class="htitle">
+    <span class="hln"><span class="hli">NI DRIP</span></span>
+    <span class="hln"><span class="hli">CENTRAL</span></span>
+    <span class="hln"><span class="hli bl">ELECTRONICS</span></span>
+  </h1>
+  <div class="hfoot">
+    <p class="hdesc">Belfast's trusted local source for affordable, reliable home &amp; entertainment appliances — new and carefully refurbished.</p>
+    <div class="hscr">
+      <div class="hscrLn"></div>
+      <span class="hscrL">Scroll</span>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────
+     02 · TICKER
+─────────────────────────────────────── -->
+<div class="tkr">
+  <div class="trow">
+    <div class="ttrk">
+      <span class="titem">NI Drip Central <span class="tdot">●</span></span>
+      <span class="titem">Belfast <span class="tdot">●</span></span>
+      <span class="titem">Fast Local Delivery <span class="tdot">●</span></span>
+      <span class="titem">New &amp; Refurbished <span class="tdot">●</span></span>
+      <span class="titem">Trusted by Locals <span class="tdot">●</span></span>
+      <span class="titem">Founded 2025 <span class="tdot">●</span></span>
+      <span class="titem">Big Brand Prices <span class="tdot">●</span></span>
+      <!-- duplicate for seamless loop -->
+      <span class="titem">NI Drip Central <span class="tdot">●</span></span>
+      <span class="titem">Belfast <span class="tdot">●</span></span>
+      <span class="titem">Fast Local Delivery <span class="tdot">●</span></span>
+      <span class="titem">New &amp; Refurbished <span class="tdot">●</span></span>
+      <span class="titem">Trusted by Locals <span class="tdot">●</span></span>
+      <span class="titem">Founded 2025 <span class="tdot">●</span></span>
+      <span class="titem">Big Brand Prices <span class="tdot">●</span></span>
+    </div>
+  </div>
+  <div class="trow">
+    <div class="ttrk rev">
+      <span class="titem">Electronics <span class="tdot">●</span></span>
+      <span class="titem">Kitchen Appliances <span class="tdot">●</span></span>
+      <span class="titem">Televisions <span class="tdot">●</span></span>
+      <span class="titem">Shawn Atkinson <span class="tdot">●</span></span>
+      <span class="titem">After-Sales Support <span class="tdot">●</span></span>
+      <span class="titem">Honest Pricing <span class="tdot">●</span></span>
+      <span class="titem">Northern Ireland <span class="tdot">●</span></span>
+      <span class="titem">Electronics <span class="tdot">●</span></span>
+      <span class="titem">Kitchen Appliances <span class="tdot">●</span></span>
+      <span class="titem">Televisions <span class="tdot">●</span></span>
+      <span class="titem">Shawn Atkinson <span class="tdot">●</span></span>
+      <span class="titem">After-Sales Support <span class="tdot">●</span></span>
+      <span class="titem">Honest Pricing <span class="tdot">●</span></span>
+      <span class="titem">Northern Ireland <span class="tdot">●</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────
+     03 · WORD SCRUB 1 — Brand Statement
+─────────────────────────────────────── -->
+<div id="ws1">
+  <div class="ws">
+    <span class="wslbl">Our Reason</span>
+    <span class="wsnm">01 / 02</span>
+    <p class="wstext" id="wsT1">Belfast's trusted local source for affordable, reliable appliances — both new and refurbished. We exist to make quality accessible to every home in Northern Ireland.</p>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────
+     04 · STATS
+─────────────────────────────────────── -->
+<div class="stats">
+  <div class="sst">
+    <div class="sstbar"></div>
+    <span class="snum" data-t="500" data-sfx="+">0+</span>
+    <span class="slbl">Homes Served</span>
+    <span class="ssub">and growing</span>
+  </div>
+  <div class="sst">
+    <div class="sstbar"></div>
+    <span class="snum" data-t="2025" data-sfx="">2025</span>
+    <span class="slbl">Year Founded</span>
+    <span class="ssub">Belfast-born</span>
+  </div>
+  <div class="sst">
+    <div class="sstbar"></div>
+    <span class="snum" data-t="6" data-sfx=" Mo">6 Mo</span>
+    <span class="slbl">Min. Warranty</span>
+    <span class="ssub">on all refurbished</span>
+  </div>
+  <div class="sst">
+    <div class="sstbar"></div>
+    <span class="snum" data-t="14" data-sfx=" Day">14 Day</span>
+    <span class="slbl">Returns Policy</span>
+    <span class="ssub">no questions asked</span>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────
+     05 · FOUNDER STORY
+─────────────────────────────────────── -->
+<section class="story">
+  <div class="stIn">
+    <div class="stL">
+      <div class="stGhost">2025</div>
+      <div class="stTag">Belfast's Own</div>
+    </div>
+    <div class="stR">
+      <span class="slabel">Our Story</span>
+      <h2>Built on Trust,<br>Powered by <em>Community</em></h2>
+      <p class="stbody">Founded by Shawn Atkinson, NI DRIP CENTRAL started with one clear mission — give Belfast families access to quality appliances at prices that actually make sense.</p>
+      <p class="stbody">We grew by doing things right. Every customer served. Every appliance delivered. Every refurbished unit inspected, cleaned, and double-checked. Belfast trusted us, and we take that responsibility seriously.</p>
+      <div class="fc">
+        <div class="fav">SA</div>
+        <div>
+          <span class="frole">Founder &amp; Director</span>
+          <span class="fname">Shawn Atkinson</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────
+     06 · WHY CHOOSE (PINNED)
+─────────────────────────────────────── -->
+<div id="why">
+  <div class="why-hd">
+    <span class="slabel">Why Choose Us</span>
+    <h2 class="why-t">Four Reasons <em>Belfast</em><br>Chooses Us</h2>
+  </div>
+  <div class="wgrid">
+    <div class="wcard">
+      <div class="wbar"></div>
+      <div class="wnum">01</div>
+      <span class="wico">⚡</span>
+      <h3>Fast Local Delivery</h3>
+      <p>Belfast-based means fast. We know the streets and we get your appliances to you quickly — no waiting around, no national courier delays.</p>
+    </div>
+    <div class="wcard">
+      <div class="wbar"></div>
+      <div class="wnum">02</div>
+      <span class="wico">£</span>
+      <h3>Affordable Big Brands</h3>
+      <p>Premium brands at honest prices. Quality appliances should be within reach for every Belfast household — not just those with premium budgets.</p>
+    </div>
+    <div class="wcard">
+      <div class="wbar"></div>
+      <div class="wnum">03</div>
+      <span class="wico">♡</span>
+      <h3>Friendly Service</h3>
+      <p>No jargon, no pressure. Just honest advice from people who genuinely care about finding you the right appliance for your home and budget.</p>
+    </div>
+    <div class="wcard">
+      <div class="wbar"></div>
+      <div class="wnum">04</div>
+      <span class="wico">●</span>
+      <h3>Belfast Trusted</h3>
+      <p>Local, accountable, and here for the long term. Your trust is the foundation everything we do is built on — and we intend to keep it.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────
+     07 · HORIZONTAL SCROLL — PRODUCTS
+─────────────────────────────────────── -->
+<div id="hs">
+  <div id="hshead">
+    <span class="slabel">What We Sell</span>
+    <h2>Home &amp; <em>Entertainment</em></h2>
+  </div>
+  <div id="hstrk">
+    <div class="hpc">
+      <div class="hpnum">01</div>
+      <span class="hpemj">📺</span>
+      <span class="hbg bb">New &amp; Refurbished</span>
+      <h3>Televisions</h3>
+      <p>Smart TVs, 4K, OLED — all major brands at prices that make sense for Belfast homes. From compact to cinema-sized.</p>
+      <div class="hpline"></div>
+    </div>
+    <div class="hpc">
+      <div class="hpnum">02</div>
+      <span class="hpemj">🧺</span>
+      <span class="hbg br">Refurbished Available</span>
+      <h3>Washing Machines</h3>
+      <p>Reliable laundry solutions for every household size and budget. Freestanding and integrated, all thoroughly tested.</p>
+      <div class="hpline"></div>
+    </div>
+    <div class="hpc">
+      <div class="hpnum">03</div>
+      <span class="hpemj">🧊</span>
+      <span class="hbg bb">New &amp; Refurbished</span>
+      <h3>Fridges &amp; Freezers</h3>
+      <p>American-style, freestanding, integrated — keep it fresh without the premium price tag. Wide range of sizes and styles.</p>
+      <div class="hpline"></div>
+    </div>
+    <div class="hpc">
+      <div class="hpnum">04</div>
+      <span class="hpemj">🎮</span>
+      <span class="hbg bn">New In</span>
+      <h3>Gaming &amp; Audio</h3>
+      <p>Home entertainment systems, sound bars, and hi-fi speakers. Bring the full cinematic experience into your living room.</p>
+      <div class="hpline"></div>
+    </div>
+    <div class="hpc">
+      <div class="hpnum">05</div>
+      <span class="hpemj">🍽️</span>
+      <span class="hbg br">Refurbished Available</span>
+      <h3>Dishwashers</h3>
+      <p>Save time, save water. Freestanding and integrated models from trusted brands. Built-in and slimline options available.</p>
+      <div class="hpline"></div>
+    </div>
+    <div class="hpc">
+      <div class="hpnum">06</div>
+      <span class="hpemj">🌬️</span>
+      <span class="hbg bn">New In</span>
+      <h3>Small Appliances</h3>
+      <p>Microwaves, vacuum cleaners, air fryers and more. Everything you need for every corner of your home, at honest prices.</p>
+      <div class="hpline"></div>
+    </div>
+  </div>
+  <div id="hdots">
+    <div class="hdot a"></div>
+    <div class="hdot"></div>
+    <div class="hdot"></div>
+    <div class="hdot"></div>
+    <div class="hdot"></div>
+    <div class="hdot"></div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────
+     08 · REFURBISHMENT PROMISE
+─────────────────────────────────────── -->
+<section class="refurb">
+  <div class="rfhd">
+    <div>
+      <span class="slabel">Refurbished Promise</span>
+      <h2 class="rftitle">Our <em>Refurbishment</em><br>Process</h2>
+    </div>
+    <div>
+      <p class="rfdesc">Every refurbished appliance at NI DRIP CENTRAL goes through a rigorous, multi-stage process before it ever reaches a customer. We don't cut corners — your confidence matters more than our convenience.</p>
+      <span class="rfbadge">✓ Minimum 6-Month Warranty on All Refurbished Items</span>
+    </div>
+  </div>
+  <div class="proc">
+    <div class="pline"><div class="pfill" id="pfill"></div></div>
+    <div class="psteps">
+      <div class="pstep" data-step="0">
+        <div class="pdot">🔍</div>
+        <span class="plbl">Inspection</span>
+        <span class="psub">Full structural &amp; electrical assessment</span>
+      </div>
+      <div class="pstep" data-step="1">
+        <div class="pdot">🧹</div>
+        <span class="plbl">Deep Clean</span>
+        <span class="psub">Professional cleaning inside &amp; out</span>
+      </div>
+      <div class="pstep" data-step="2">
+        <div class="pdot">⚙️</div>
+        <span class="plbl">Repair</span>
+        <span class="psub">Parts replaced to full working order</span>
+      </div>
+      <div class="pstep" data-step="3">
+        <div class="pdot">✅</div>
+        <span class="plbl">Rigorous Testing</span>
+        <span class="psub">All functions tested to pass our standards</span>
+      </div>
+      <div class="pstep" data-step="4">
+        <div class="pdot">🏷️</div>
+        <span class="plbl">Grade &amp; Sell</span>
+        <span class="psub">Cosmetically graded, defects disclosed</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────
+     09 · DELIVERY
+─────────────────────────────────────── -->
+<section class="del">
+  <div class="delhd">
+    <span class="slabel">Delivery</span>
+    <h2 class="deltitle">We Deliver Across<br><em>Northern Ireland</em></h2>
+    <p class="delsub">And beyond — Republic of Ireland and mainland UK available on request.</p>
+  </div>
+  <div class="delgrid">
+    <div class="delzones">
+      <div class="delz">
+        <div class="dbar"></div>
+        <span class="dzname">Belfast &amp; Local Areas</span>
+        <div class="dztime"><strong>1–3</strong><span>Working Days</span></div>
+      </div>
+      <div class="delz">
+        <div class="dbar"></div>
+        <span class="dzname">Greater Northern Ireland</span>
+        <div class="dztime"><strong>3–5</strong><span>Working Days</span></div>
+      </div>
+      <div class="delz">
+        <div class="dbar"></div>
+        <span class="dzname">Republic of Ireland &amp; UK</span>
+        <div class="dztime"><strong>5–7</strong><span>Working Days</span></div>
+      </div>
+    </div>
+    <div class="delxtras">
+      <div class="delx">
+        <span class="dxlbl">Express</span>
+        <div class="dxtitle">Next-Day Delivery</div>
+        <p>Available for in-stock items ordered before 2pm. Contact us to arrange.</p>
+      </div>
+      <div class="delx">
+        <span class="dxlbl">Collect</span>
+        <div class="dxtitle">Free In-Store Collection</div>
+        <p>Visit us in Belfast during business hours. Free of charge, available for all orders.</p>
+      </div>
+      <div class="delx">
+        <span class="dxlbl">Large Appliances</span>
+        <div class="dxtitle">Installation Included</div>
+        <p>Delivery of large appliances includes installation where applicable at no extra cost.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────
+     10 · WORD SCRUB 2 — Commitment
+─────────────────────────────────────── -->
+<div id="ws2">
+  <div class="ws">
+    <span class="wslbl">Our Commitment</span>
+    <span class="wsnm">02 / 02</span>
+    <p class="wstext" id="wsT2">Our commitment goes beyond simply selling appliances. We're building long-term trust — with clear pricing, honest product descriptions, and reliable after-sales support that genuinely makes everyday life easier.</p>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────
+     11 · RETURNS & WARRANTY
+─────────────────────────────────────── -->
+<div class="rw">
+  <div class="rwc">
+    <div class="rwbar"></div>
+    <span class="rwlbl">Returns Policy</span>
+    <span class="rwbig">14</span>
+    <p class="rwdesc">Day returns on most products from the date of delivery. Item must be unused, in original condition and packaging. Faulty items collected free of charge. Refund processed within 5–7 working days to your original payment method.</p>
+  </div>
+  <div class="rwc">
+    <div class="rwbar"></div>
+    <span class="rwlbl">Refurbished Warranty</span>
+    <span class="rwbig">6+</span>
+    <p class="rwdesc">Month minimum warranty on every refurbished item we sell. New products carry the full manufacturer's warranty — typically 1 to 2 years. Extended warranties available on selected products for total peace of mind.</p>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────
+     12 · PAYMENT & SUPPORT
+─────────────────────────────────────── -->
+<section class="pay">
+  <div class="payIn">
+    <div>
+      <span class="slabel">Payment Options</span>
+      <h2 class="paytit">Pay Your<br><em>Way</em></h2>
+      <div class="pmethods">
+        <div class="pm">
+          <span class="pmico">💳</span>
+          <span class="pmname">Cards</span>
+          <span class="pmdesc">Visa, Mastercard &amp; Amex accepted online and in store</span>
+        </div>
+        <div class="pm">
+          <span class="pmico">🏦</span>
+          <span class="pmname">Bank Transfer</span>
+          <span class="pmdesc">Available for larger purchases. Contact us for details</span>
+        </div>
+        <div class="pm">
+          <span class="pmico">💵</span>
+          <span class="pmname">Cash</span>
+          <span class="pmdesc">Accepted for in-store purchases and local collection orders</span>
+        </div>
+        <div class="pm">
+          <span class="pmico">📋</span>
+          <span class="pmname">Finance</span>
+          <span class="pmdesc">Interest-free &amp; low-rate options on qualifying orders</span>
+        </div>
+      </div>
+      <div class="pfin">
+        <span style="font-size:22px">✨</span>
+        <p><strong>Interest-free finance available</strong> on qualifying orders. Spread the cost of big appliances without the stress.</p>
+      </div>
+    </div>
+    <div>
+      <span class="slabel">Customer Support</span>
+      <h2 class="paytit">We're<br><em>Here</em> For You</h2>
+      <div class="supch">
+        <div class="sc">
+          <div class="scdot"></div>
+          <span class="scname">Phone</span>
+          <span class="scdet">Immediate assistance during business hours</span>
+        </div>
+        <div class="sc">
+          <div class="scdot"></div>
+          <span class="scname">Email</span>
+          <span class="scdet">We respond within 24 hours</span>
+        </div>
+        <div class="sc">
+          <div class="scdot"></div>
+          <span class="scname">In-Store</span>
+          <span class="scdet">Face-to-face support in Belfast</span>
+        </div>
+        <div class="sc">
+          <div class="scdot"></div>
+          <span class="scname">Social Media</span>
+          <span class="scdet">Reach us across our social channels</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────
+     13 · CTA
+─────────────────────────────────────── -->
+<section class="cta">
+  <div class="ctaghost">BELFAST</div>
+  <span class="ctatag">Serving Belfast Since 2025</span>
+  <h2 class="ctatit">Ready to <em>Upgrade</em><br>Your Home?</h2>
+  <a href="#" class="magbtn" id="magBtn">SHOP THE STORE &nbsp;→</a>
+  <span class="ctaloc">● Belfast, Northern Ireland &nbsp;·&nbsp; Local Delivery Available &nbsp;·&nbsp; New &amp; Refurbished</span>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <span class="flogo">NI Drip <em>Central</em></span>
+  <div class="flinks">
+    <a href="#" class="flnk">Products</a>
+    <a href="#" class="flnk">Refurbished</a>
+    <a href="#" class="flnk">Delivery</a>
+    <a href="#" class="flnk">Contact</a>
+  </div>
+  <span class="fcopy">© 2025 NI Drip Central Electronics &amp; Appliances · Belfast, NI</span>
+</footer>
+
+<!-- ── SCRIPTS ── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── LENIS ── */
+const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add(t => lenis.raf(t * 1000));
+gsap.ticker.lagSmoothing(0);
+
+/* ── PROGRESS BAR ── */
+const pb = document.getElementById('pb');
+window.addEventListener('scroll', () => {
+  pb.style.width = (window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100) + '%';
+}, { passive: true });
+
+/* ── NAV ── */
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('s', window.scrollY > 60);
+}, { passive: true });
+
+/* ── CURSOR ── */
+const cd = document.getElementById('cd'), cr = document.getElementById('cr');
+let mx = 0, my = 0, cx = 0, cy = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cd.style.left = mx + 'px'; cd.style.top = my + 'px';
+});
+(function tick() {
+  cx += (mx - cx) * 0.1; cy += (my - cy) * 0.1;
+  cr.style.left = cx + 'px'; cr.style.top = cy + 'px';
+  requestAnimationFrame(tick);
+})();
+document.querySelectorAll('a,button,.hpc,.wcard,.delz,.rwc,.pm,.sc').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('ch'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('ch'));
+});
+
+/* ── MAGNETIC BUTTON ── */
+const mb = document.getElementById('magBtn');
+mb.addEventListener('mousemove', e => {
+  const r = mb.getBoundingClientRect();
+  gsap.to(mb, { x: (e.clientX - r.left - r.width / 2) * 0.28, y: (e.clientY - r.top - r.height / 2) * 0.28, duration: .3, ease: 'power2.out' });
+});
+mb.addEventListener('mouseleave', () => gsap.to(mb, { x: 0, y: 0, duration: .7, ease: 'elastic.out(1.2,.4)' }));
+
+/* ─────────────────────────────────────
+   HERO ENTRANCE
+───────────────────────────────────── */
+const heroTl = gsap.timeline({ delay: 0.1 });
+heroTl
+  .to('.hli', { y: 0, duration: 1.2, stagger: 0.1, ease: 'power4.out' })
+  .to('.h眉',  { opacity: 1, y: 0, duration: .7, ease: 'power3.out' }, .25)
+  .to('.hdesc',{ opacity: 1, y: 0, duration: .7, ease: 'power3.out' }, .45)
+  .to('.hscr', { opacity: 1, duration: .5 }, .65)
+  .to(['.nL', '.nR'], { opacity: 1, duration: .5 }, .2);
+
+/* Hero parallax exit */
+gsap.to('.htitle', { y: -110, opacity: 0, scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1.4 } });
+gsap.to('.hdesc',  { y: -55,            scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1.9 } });
+gsap.to('.hgrid',  { y: -40,            scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1 } });
+
+/* ─────────────────────────────────────
+   WORD SCRUB — helper
+───────────────────────────────────── */
+function buildScrub(wrapperId, textId, label, scrollDist) {
+  const el = document.getElementById(textId);
+  const words = el.textContent.trim().split(/\s+/);
+  el.innerHTML = words.map(w => `<span class="sw">${w}</span>`).join(' ');
+  const spans = el.querySelectorAll('.sw');
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: '#' + wrapperId,
+      start: 'top top',
+      end: '+=' + scrollDist + '%',
+      pin: true,
+      scrub: 1.6,
+    }
+  });
+  spans.forEach((s, i) => tl.to(s, { color: '#F0EDE6', duration: .4 }, i / spans.length * (scrollDist * .04)));
+}
+
+buildScrub('ws1', 'wsT1', 'Our Reason', 260);
+buildScrub('ws2', 'wsT2', 'Our Commitment', 250);
+
+/* ─────────────────────────────────────
+   STATS — animated counters
+───────────────────────────────────── */
+document.querySelectorAll('.snum[data-t]').forEach(el => {
+  const target = parseFloat(el.dataset.t);
+  const sfx = el.dataset.sfx || '';
+  ScrollTrigger.create({
+    trigger: el, start: 'top 85%', once: true,
+    onEnter() {
+      el.closest('.sst').classList.add('in');
+      if (target < 100) {
+        el.textContent = target + sfx; return;
+      }
+      gsap.to({ v: 0 }, {
+        v: target, duration: 2.2, ease: 'power3.out',
+        onUpdate() { el.textContent = Math.round(this.targets()[0].v).toLocaleString() + sfx; }
+      });
+    }
+  });
+});
+
+/* ─────────────────────────────────────
+   STORY / FOUNDER
+───────────────────────────────────── */
+gsap.from('.stGhost', { x: -70, opacity: 0, duration: 1.4, ease: 'power3.out', scrollTrigger: { trigger: '.story', start: 'top 70%' } });
+gsap.from('.stR > *',  { y: 30,  opacity: 0, duration: .9, stagger: .13, ease: 'power3.out', scrollTrigger: { trigger: '.stR', start: 'top 75%' } });
+gsap.from('.stTag',    { x: -30, opacity: 0, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: '.stL', start: 'top 75%' } });
+
+/* ─────────────────────────────────────
+   WHY CHOOSE — pinned progressive
+───────────────────────────────────── */
+const wcards = document.querySelectorAll('.wcard');
+ScrollTrigger.create({
+  trigger: '#why',
+  start: 'top top',
+  end: '+=380%',
+  pin: true,
+  anticipatePin: 1,
+  onUpdate(self) {
+    const p = self.progress;
+    wcards.forEach((c, i) => {
+      const s = i * 0.21, e = s + 0.19;
+      const cp = Math.max(0, Math.min(1, (p - s) / (e - s)));
+      c.style.opacity = cp;
+      c.style.transform = `translateY(${28 * (1 - cp)}px)`;
+      if (cp > .52 && !c.classList.contains('lit')) c.classList.add('lit');
+    });
+  }
+});
+
+/* ─────────────────────────────────────
+   HORIZONTAL SCROLL — products
+───────────────────────────────────── */
+const hstrk = document.getElementById('hstrk');
+const hdots = document.querySelectorAll('.hdot');
+const hcards = gsap.utils.toArray('.hpc');
+
+gsap.to(hstrk, {
+  x: () => -(hstrk.scrollWidth - window.innerWidth),
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#hs',
+    pin: true,
+    scrub: 1.2,
+    invalidateOnRefresh: true,
+    end: () => '+=' + (hstrk.scrollWidth - window.innerWidth),
+    onUpdate(self) {
+      const idx = Math.round(self.progress * (hcards.length - 1));
+      hdots.forEach((d, i) => d.classList.toggle('a', i === idx));
+    }
+  }
+});
+
+/* ─────────────────────────────────────
+   REFURB PROCESS
+───────────────────────────────────── */
+gsap.from(['.rftitle', '.rfdesc', '.rfbadge'], { y: 36, opacity: 0, duration: 1, stagger: .14, ease: 'power3.out', scrollTrigger: { trigger: '.rfhd', start: 'top 78%' } });
+
+gsap.to('.pfill', {
+  scaleX: 1, ease: 'none',
+  scrollTrigger: { trigger: '.proc', start: 'top 65%', end: 'bottom 55%', scrub: 1 }
+});
+
+gsap.to('.pstep', {
+  opacity: 1, y: 0, duration: .65, stagger: .15, ease: 'power3.out',
+  scrollTrigger: {
+    trigger: '.proc', start: 'top 65%',
+    onEnter() {
+      document.querySelectorAll('.pstep').forEach((s, i) =>
+        setTimeout(() => s.classList.add('lit'), i * 200)
+      );
+    }
+  }
+});
+
+/* ─────────────────────────────────────
+   DELIVERY
+───────────────────────────────────── */
+gsap.from(['.deltitle', '.delsub'], { y: 36, opacity: 0, duration: 1, stagger: .12, ease: 'power3.out', scrollTrigger: { trigger: '.delhd', start: 'top 80%' } });
+
+gsap.to('.delz', {
+  opacity: 1, x: 0, duration: .7, stagger: .18, ease: 'power3.out',
+  scrollTrigger: {
+    trigger: '.delzones', start: 'top 78%',
+    onEnter() { document.querySelectorAll('.delz').forEach(z => z.classList.add('in')); }
+  }
+});
+
+gsap.to('.delx', { opacity: 1, x: 0, duration: .7, stagger: .14, ease: 'power3.out', scrollTrigger: { trigger: '.delxtras', start: 'top 78%' } });
+
+/* ─────────────────────────────────────
+   RETURNS / WARRANTY
+───────────────────────────────────── */
+gsap.to('.rwc', {
+  opacity: 1, y: 0, duration: .9, stagger: .2, ease: 'power3.out',
+  scrollTrigger: {
+    trigger: '.rw', start: 'top 80%',
+    onEnter() { document.querySelectorAll('.rwc').forEach(c => c.classList.add('in')); }
+  }
+});
+
+/* ─────────────────────────────────────
+   PAYMENT & SUPPORT
+───────────────────────────────────── */
+gsap.from(['.paytit'], { y: 30, opacity: 0, duration: 1, stagger: .2, ease: 'power3.out', scrollTrigger: { trigger: '.pay', start: 'top 80%' } });
+gsap.to('.pm',  { opacity: 1, y: 0, duration: .6, stagger: .1,  ease: 'power3.out', scrollTrigger: { trigger: '.pmethods',  start: 'top 80%' } });
+gsap.to('.pfin',{ opacity: 1, y: 0, duration: .6,               ease: 'power3.out', scrollTrigger: { trigger: '.pfin',      start: 'top 88%' } });
+gsap.to('.sc',  { opacity: 1, x: 0, duration: .6, stagger: .12, ease: 'power3.out', scrollTrigger: { trigger: '.supch',     start: 'top 80%' } });
+
+/* ─────────────────────────────────────
+   CTA
+───────────────────────────────────── */
+const ctaTl = gsap.timeline({ scrollTrigger: { trigger: '.cta', start: 'top 78%' } });
+ctaTl
+  .to('.ctatag', { opacity: 1, y: 0, duration: .6 })
+  .to('.ctatit', { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' }, '-=.3')
+  .to('.magbtn', { opacity: 1, scale: 1, duration: .9, ease: 'back.out(1.8)' }, '-=.5')
+  .to('.ctaloc', { opacity: 1, duration: .5 }, '-=.2');
+
+gsap.from('.ctaghost', { scale: .75, opacity: 0, duration: 2, ease: 'power3.out', scrollTrigger: { trigger: '.cta', start: 'top 80%' } });
+
+/* ─────────────────────────────────────
+   SECTION LABELS (global)
+───────────────────────────────────── */
+gsap.utils.toArray('.slabel').forEach(el => {
+  gsap.from(el, { opacity: 0, x: -14, duration: .5, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
+});
+
+/* ScrollTrigger.refresh after fonts */
+document.fonts.ready.then(() => ScrollTrigger.refresh());
+</script>
+</body>
+</html>
