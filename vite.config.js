@@ -5,23 +5,27 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
+export default defineConfig(({ mode }) => {
+  const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production' && !process.env.WP_BUILD;
 
-  // Change this to match your child theme path on the server
-  base: '/wp-content/themes/your-child-theme/dist/',
+  return {
+    plugins: [
+      react(),
+      tailwindcss(),
+    ],
 
-  build: {
-    outDir: 'dist',
-    rollupOptions: {
-      output: {
-        entryFileNames: 'bundle.js',
-        chunkFileNames: 'bundle.js',
-        assetFileNames: 'bundle.[ext]', // bundle.css
+    // Use '/' for Vercel/Netlify, but the specific path for WordPress
+    base: isVercel ? '/' : '/wp-content/themes/your-child-theme/dist/',
+
+    build: {
+      outDir: 'dist',
+      rollupOptions: {
+        output: {
+          entryFileNames: 'bundle.js',
+          chunkFileNames: 'bundle.js',
+          assetFileNames: 'bundle.[ext]', // bundle.css
+        },
       },
     },
-  },
+  }
 })
